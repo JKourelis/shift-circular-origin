@@ -13,12 +13,6 @@ A Python package for rotating circular DNA sequences to start at specified origi
 
 ## Installation
 
-### From PyPI (when published)
-```bash
-pip install shift-circular-origin
-```
-
-### From Source
 ```bash
 git clone https://github.com/yourusername/shift-circular-origin.git
 cd shift-circular-origin
@@ -31,37 +25,29 @@ pip install -e .
 
 Process all FASTA files in a folder:
 ```bash
-shift-circular-origin /path/to/fasta/files
+shift-circular-origin /path/to/fasta/folder
 ```
 
 Add custom origin sequences:
 ```bash
-shift-circular-origin /path/to/fasta/files --additional-origins "ATGCCCGGG;CCCGGGATG"
+shift-circular-origin /path/to/fasta/folder --additional-origins "ATGCCCGGG;CCCGGGATG"
 ```
 
 Specify output file:
 ```bash
-shift-circular-origin /path/to/fasta/files --output results.fasta
+shift-circular-origin /path/to/fasta/folder --output results.fasta
 ```
 
-### Python API Usage
+### Python Usage
 
 ```python
-from shift_circular_origin import SequenceRotator, rotate_sequences_in_folder
+from shift_circular_origin import rotate_sequences_in_folder
 
-# Simple batch processing
-rotate_sequences_in_folder("/path/to/fasta/files")
+# Basic usage
+rotate_sequences_in_folder("fasta_folder")
 
-# With additional origin sequences
-rotate_sequences_in_folder(
-    "/path/to/fasta/files", 
-    additional_candidates="ATGCCCGGG;CCCGGGATG"
-)
-
-# Advanced usage with custom rotator
-rotator = SequenceRotator()
-rotator.add_candidate_sequences(["ATGCCCGGG", "CCCGGGATG"])
-rotator.process_folder("/path/to/fasta/files", "output.fasta")
+# With custom origins
+rotate_sequences_in_folder("fasta_folder", additional_candidates="ATGCCCGGG;CCCGGGATG")
 ```
 
 ## How It Works
@@ -69,7 +55,7 @@ rotator.process_folder("/path/to/fasta/files", "output.fasta")
 1. **Input Processing**: Reads all FASTA files from the specified folder
 2. **Length Filtering**: Excludes sequences longer than the specified maximum (default: 200kb)
 3. **Origin Detection**: Searches for candidate origin sequences in both forward and reverse complement orientations
-4. **Circular Boundary Handling**: Uses a doubled-sequence approach to detect origins that span the end-to-start boundary
+4. **Circular Sequence Handling**: Uses a doubled-sequence approach to detect origins that span the end-to-start boundary
 5. **Sequence Rotation**: Rotates matching sequences so they start at the detected origin
 6. **Output Generation**: Writes all processed sequences to a single FASTA file
 
@@ -78,55 +64,13 @@ rotator.process_folder("/path/to/fasta/files", "output.fasta")
 The package includes origins from common plasmid backbones:
 
 - **pVS1**: Long and short variants
-- **pRNAiGG**: Gateway-compatible vectors
+- **pRNAiGG**: Plant RNAi vector
 - **RK2**: Broad-host-range plasmids
 - **pL0V**: SEVA collection vectors
 - **pSEVA23/69**: Standard biological parts
 - **pK18**: Cloning vectors
 - **pET28**: Expression vectors
 - **pUAP1**: Plant transformation vectors
-
-## Technical Details
-
-### Circular Boundary Problem
-
-The original R implementation had a critical bug where origin sequences spanning the circular boundary (from end back to start) were not detected. This Python implementation fixes this by:
-
-1. Creating a doubled sequence (original + original)
-2. Searching for patterns in the first copy plus pattern length
-3. Properly handling matches that extend beyond the original sequence length
-
-### Algorithm Steps
-
-1. Check if sequence already starts with any candidate origin
-2. Search forward strand using circular-aware pattern matching
-3. If found, rotate sequence to start at that position
-4. If not found, search reverse complement strand
-5. If found in reverse complement, use the reverse complement and rotate
-6. If no origin found, leave sequence unchanged
-
-## API Reference
-
-### SequenceRotator Class
-
-Main class for handling sequence rotation operations.
-
-**Constructor:**
-```python
-SequenceRotator(candidate_sequences=None, max_length=200000)
-```
-
-**Key Methods:**
-- `add_candidate_sequences(sequences)`: Add custom origin sequences
-- `process_sequence(seq_record)`: Process a single BioPython SeqRecord
-- `process_fasta_file(input_file)`: Process all sequences in a FASTA file
-- `process_folder(folder_path, output_file)`: Batch process folder of FASTA files
-
-### Convenience Function
-
-```python
-rotate_sequences_in_folder(folder_path, additional_candidates=None, output_file=None, max_length=200000)
-```
 
 ## Requirements
 
@@ -168,7 +112,7 @@ If you use this software in your research, please cite:
 
 ```
 Shift Circular Origin: A Python package for rotating circular DNA sequences
-URL: https://github.com/JKourelis/shift-circular-origin
+URL: https://github.com/yourusername/shift-circular-origin
 ```
 
 ## Changelog

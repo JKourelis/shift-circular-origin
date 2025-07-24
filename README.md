@@ -64,7 +64,7 @@ rotate_sequences_in_folder("fasta_folder", additional_candidates="ATGCCCGGG;CCCG
 The package includes origins from common plasmid backbones, defined in `origins.csv`:
 
 - **pVS1**: Long and short variants
-- **pRNAiGG**: Gateway-compatible vectors
+- **pBin19**: Binary vector Bin19
 - **RK2**: Broad-host-range plasmids
 - **pL0V**: SEVA collection vectors
 - **pSEVA23/69**: Standard biological parts
@@ -155,7 +155,7 @@ If you use this software in your research, please cite:
 
 ```
 Shift Circular Origin: A Python package for rotating circular DNA sequences
-URL: https://github.com/yourusername/shift-circular-origin
+URL: https://https://github.com/JKourelis/shift-circular-origin
 ```
 
 ## Changelog

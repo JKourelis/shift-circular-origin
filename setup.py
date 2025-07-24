@@ -17,6 +17,10 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/shift-circular-origin",
     packages=find_packages(),
+    package_data={
+        "shift_circular_origin": ["origins.csv"],
+    },
+    include_package_data=True,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -44,6 +48,7 @@ setup(
     entry_points={
         "console_scripts": [
             "shift-circular-origin=shift_circular_origin.cli:main",
+            "origins-manager=shift_circular_origin.origins_utils:main",
         ],
     },
     keywords="bioinformatics dna sequences plasmids origin rotation circular",

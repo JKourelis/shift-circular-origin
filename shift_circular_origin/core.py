@@ -7,11 +7,36 @@ DNA sequences to ensure they start at known origin sequences.
 
 import os
 import re
+import csv
 from pathlib import Path
 from typing import List, Tuple, Optional, Union
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+
+
+def _load_default_origins() -> List[str]:
+    """
+    Load default origin sequences from the origins.csv file.
+    
+    Returns:
+        List of origin sequences
+    """
+    origins_file = Path(__file__).parent / "origins.csv"
+    origins = []
+    
+    try:
+        with open(origins_file, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if 'sequence' in row and row['sequence'].strip():
+                    origins.append(row['sequence'].strip().upper())
+    except FileNotFoundError:
+        print(f"Warning: origins.csv not found at {origins_file}. Using empty origin list.")
+    except Exception as e:
+        print(f"Warning: Error reading origins.csv: {e}. Using empty origin list.")
+    
+    return origins
 
 
 class SequenceRotator:
@@ -23,31 +48,19 @@ class SequenceRotator:
     the circular boundary (end-to-start wrap-around).
     """
     
-    # Default candidate origin sequences (same as R script)
-    DEFAULT_CANDIDATES = [
-        "ATGAACAAGAGCGCCGCCGCTGGCCTGCTGGGCTATGCCCGCGTCAGCACCGACGACCAGGACTTGACCAACCAACGGGCCGAACTGCACGCGGCCGGCTGCACCAAGCTGTTTTCCGAGAAGATCACCGGCACCAGGCGCGACCGCCCG",  # pVS1 Long
-        "CGTGCGGCTGCATGAAATCCTGGCCGGTTTGTCTGATGCCAAGCTGGCGGCCTGGCCGGCCAGCTTGGCCGCTGAAGAAACCGAGCGCCGCCGTCTAAAAAGGTGATGTGTATTTGAGTAAAACAGCTTGCGTCATGCGGTCGCTGCGTA",  # pVS1 short
-        "TGGCGCCGGCCAGCGAGACGAGCAAGATTGGCCGCCGCCCGAAACGATCCGACAGCGCGCCCAGCACAGGTGCGCAGGCAAATTGCACCAACGCATACAGCGCCAGCAGAATGCCATAGTGGGCGGTGACGTCGTTCGAGTGAACCAGAT",  # pRNAiGG
-        "CGCTGGCTGCTGAACCCCCAGCCGGAACTGACCCCACAAGGCCCTAGCGTTTGCAATGCACCAGGTCATCATTGACCCAGGCGTGTTCCACCAGGCCGCTGCCTCGCAACTCTTCGCAGGCTTCGCCGACCTGCTCGCGCCACTTCTTCA",  # RK2
-        "GACGAAAGGGCCTCGTGATACGCCTATTTTTATAGGTTAATGTCATGATAATAATGGTTTCTTAGACGTCAGGTGGCACTTTTCGGGGAAATGTGCGCGGAACCCCTATTTGTTTATTTTTCTAAATACATTCAAATATGTATCCGCTCA",  # pL0V
-        "AGGCACGAACCCAGTGGACATAAGCCTGTTCGGTTCGTAAGCTGTAATGCAAGTAGCGTATGCGCTCACGCAACTGGTCCAGAACCTTGACCGAACGCAGCGGTGGTAACGGCGCAGTGGCGGTTTTCATGGCTTGTTATGACTGTTTTT",  # pL0V uni
-        "GGGTCCCCAATAATTACGATTTAAATTTGTGTCTCAAAATCTCTGATGTTACATTGCACAAGATAAAAATATATCATCATGAACAATAAAACTGTCTGCTTACATAAACAGTAATACAAGGGGTGTTATGAGCCATATTCAGCGTGAAAC",  # pSEVA23
-        "GGGTCCCCAATAATTACGATTTAAATTTGACATAAGCCTGTTCGGTTCGTAAACTGTAATGCAAGTAGCGTATGCGCTCACGCAACTGGTCCAGAACCTTGACCGAACGCAGCGGTGGTAACGGCGCAGTGGCGGTTTTCATGGCTTGTT",  # pSEVA69
-        "GCTTCACGCTGCCGCAAGCACTCAGGGCGCAAGGGCTGCTAAAGGAAGCGGAACACGTAGAAAGCCAGTCCGCAGAAACGGTGCTGACCCCGGATGAATGTCAGCTACTGGGCTATCTGGACAAGGGAAAACGCAAGCGCAAAGAGAAAG",  # pK18
-        "ACGCGCCCTGTAGCGGCGCATTAAGCGCGGCGGGTGTGGTGGTTACGCGCAGCGTGACCGCTACACTTGCCAGCGCCCTAGCGCCCGCTCCTTTCGCTTTCTTCCCTTCCTTTCTCGCCACGTTCGCCGGCTTTCCCCGTCAAGCTCTAA",  # pET28
-        "TCGCGTTATGCAGGCTTCCTCGCTCACTGACTCGCTGCGCTCGGTCGTTCGGCTGCGGCGAGCGGTATCAGCTCACTCAAAGGCGGTAATACGGTTATCCACAGAATCAGGGGATAACGCAGGAAAGAACATGTGAGCAAAAGGCCAGCA"   # pUAP1
-    ]
-    
     def __init__(self, candidate_sequences: Optional[List[str]] = None, max_length: int = 200000):
         """
         Initialize the SequenceRotator.
         
         Args:
             candidate_sequences: List of DNA sequences to search for as origins.
-                                If None, uses default candidates.
+                                If None, uses origins from origins.csv file.
             max_length: Maximum sequence length to process (default: 200,000 bp)
         """
-        self.candidate_sequences = candidate_sequences or self.DEFAULT_CANDIDATES
+        if candidate_sequences is None:
+            self.candidate_sequences = _load_default_origins()
+        else:
+            self.candidate_sequences = [seq.upper() for seq in candidate_sequences]
         self.max_length = max_length
     
     def add_candidate_sequences(self, sequences: Union[str, List[str]]):

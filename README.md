@@ -61,16 +61,57 @@ rotate_sequences_in_folder("fasta_folder", additional_candidates="ATGCCCGGG;CCCG
 
 ## Built-in Origin Sequences
 
-The package includes origins from common plasmid backbones:
+The package includes origins from common plasmid backbones, defined in `origins.csv`:
 
 - **pVS1**: Long and short variants
-- **pRNAiGG**: Plant RNAi vector
+- **pRNAiGG**: Gateway-compatible vectors
 - **RK2**: Broad-host-range plasmids
 - **pL0V**: SEVA collection vectors
 - **pSEVA23/69**: Standard biological parts
 - **pK18**: Cloning vectors
 - **pET28**: Expression vectors
 - **pUAP1**: Plant transformation vectors
+
+## Customizing Origin Sequences
+
+You can customize the origin sequences by editing the `origins.csv` file in the installed package.
+
+### Using the Origins Manager CLI
+
+```bash
+# List all current origins
+origins-manager list
+
+# Find the origins.csv file location
+origins-manager path
+
+# Add a new origin
+origins-manager add my_origin ATGCCCGGGAAATTT
+
+# Remove an origin
+origins-manager remove my_origin
+```
+
+### Manual Editing
+
+1. **Find the file location:**
+```python
+import shift_circular_origin
+from pathlib import Path
+csv_path = Path(shift_circular_origin.__file__).parent / "origins.csv"
+print(csv_path)
+```
+
+2. **Edit the CSV file:**
+```csv
+name,sequence
+my_custom_origin,ATGCCCGGGAAATTT
+pVS1_long,ATGAACAAGAGCGCC...
+```
+
+3. **Restart Python** to load the new origins
+
+The CSV format is simple: `name,sequence` with one origin per line.
 
 ## Requirements
 
@@ -84,7 +125,9 @@ shift-circular-origin/
 ├── shift_circular_origin/
 │   ├── __init__.py          # Package initialization
 │   ├── core.py              # Main functionality
-│   └── cli.py               # Command-line interface
+│   ├── cli.py               # Command-line interface
+│   ├── origins_utils.py     # Origins management utilities
+│   └── origins.csv          # Origin sequences database (editable)
 ├── setup.py                 # Package configuration
 ├── requirements.txt         # Dependencies
 ├── README.md               # This file
